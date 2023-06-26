@@ -1,5 +1,7 @@
 package com.staticnoiselog.springboot3client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,6 +25,7 @@ import java.util.Map;
 
 @SpringBootApplication
 public class SpringBoot3ClientApplication {
+    private static final Logger logger = LoggerFactory.getLogger(SpringBoot3ClientApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(SpringBoot3ClientApplication.class, args);
@@ -30,7 +33,7 @@ public class SpringBoot3ClientApplication {
 
     @Bean
     ApplicationRunner applicationRunner(CustomerClient customerClient) {
-        return args -> customerClient.all().subscribe(System.out::println);
+        return args -> customerClient.all().subscribe(customer -> logger.info(customer.toString()));
     }
 
     @Bean
@@ -38,11 +41,10 @@ public class SpringBoot3ClientApplication {
         // most of this can be done once for the application and reused, no need to repeat it for each client you build
         var wc = builder.baseUrl("http://localhost:8080/").build();
         var wca = WebClientAdapter.forClient(wc);
-        var hsp = HttpServiceProxyFactory.builder()
+        return HttpServiceProxyFactory.builder()
                 .clientAdapter(wca)
                 .build()
                 .createClient(CustomerClient.class);
-        return hsp;
     }
 
     @Bean
